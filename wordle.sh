@@ -8,5 +8,5 @@ elif [ X$1 == "Xi" ]; then
   awk "`echo $2 | sed "s,., /&/ \&\&,g" | sed "s, &&$,,"`"
 elif [ X$1 == "Xc" ]; then
   # display letter histogram of candidate words
-  sed "s,.,&\n,g" | grep -v ^$ | sort | uniq -c | sort -rn
+  sed "s,.,&\n,g" | grep -v ^$ | sort | uniq -c | sort -rn | grep -v `echo $2 | sed "s,.,-e & ,g"`
 fi
