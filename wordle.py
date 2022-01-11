@@ -113,5 +113,10 @@ if sys.argv[2] == "ixr":
         print(s)
   else:
     print("non-selectable candidates:")
+    combo_seen = 0
     for word, combo in iteritems(False).items():
-      print(combo, word)
+      if combo < combo_seen:
+        break
+      else:
+        combo_seen = combo
+      print(word)
