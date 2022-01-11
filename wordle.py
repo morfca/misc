@@ -81,13 +81,17 @@ if sys.argv[2] == "ixr":
   if len(sol) == 1:
     print("unique solution found: ", sol[0])
     sys.exit(0)
-  def iteritems():
+  def iteritems(double_filter = True):
     hist = list(histogram(selector(sys.argv[5], exclude(sys.argv[4], include(sys.argv[3], dic)))).items())
     hist.sort(key=lambda i:i[1], reverse=True)
     out = {}
     for n in range(WORDSIZE, 0, -1):
       for c in combinations(map(lambda i:i[0], hist), n):
-        for candidate in exclude(sys.argv[3], include("".join(c), dic)):
+        if double_filter:
+          candidates = exclude(sys.argv[3], include("".join(c), dic))
+        else:
+          candidates = include("".join(c), dic)
+        for candidate in candidates:
           if candidate not in out:
             out[candidate] = n
           if len(out) > 10:
@@ -107,3 +111,7 @@ if sys.argv[2] == "ixr":
       print("no strong downselect candidates, suggesting direct matches:")
       for s in sol[:5]:
         print(s)
+  else:
+    print("non-selectable candidates:")
+    for word, combo in iteritems(False).items():
+      print(combo, word)
