@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from collections import Counter
+from functools import reduce
 from itertools import combinations
 import re
 import sys
@@ -8,49 +9,29 @@ import sys
 WORDSIZE=5
 
 def sizefilter(dic):
-  return filter(lambda w: len(w) == WORDSIZE, dic)
-
-def combos(letters):
-  out = []
-  letters = list(letters)
-  for l in range(min(WORDSIZE, len(letters)), 0, -1):
-    for combo in combinations(letters, l):
-      out.append(combo)
-  return out
+  return list(filter(lambda w: len(w) == WORDSIZE, dic))
 
 def include(letters, dic):
-  out = []
+  out = dic.copy()
   if letters == ".":
     return dic
-  for word in dic:
-    word_letters = Counter(word)
-    for l in letters:
-      if l not in word_letters:
-        break
-    else:
-      out.append(word)
+  for l in letters:
+    out = list(filter(lambda w: l in w, out))
   return out
 
 def exclude(letters, dic):
-  out = []
-  for word in dic:
-    if not re.search("[" + letters + "]", word):
-      out.append(word)
-  return out
+  letters = re.compile("[" + letters + "]")
+  return list(filter(lambda i: not letters.search(i), dic))
 
 def histogram(dic):
   total = Counter()
-  for word in dic:
-    total += Counter(word)
-  return total
+  return reduce(lambda i, j: i + j, map(Counter, dic))
 
 def selector(pattern, dic):
-  out = []
+  out = dic.copy()
   pattern = re.sub("_([a-z]+)_", lambda i: "[^" + i.group(1) + "]", pattern)
   pattern = re.compile(pattern)
-  for word in dic:
-    if pattern.match(word):
-      out.append(word)
+  out = list(filter(pattern.match, out))
   return out
 
 dic = set()
