@@ -25,7 +25,7 @@ def exclude(letters, dic):
 
 def histogram(dic):
   total = Counter()
-  return reduce(lambda i, j: i + j, map(Counter, dic))
+  return reduce(lambda i, j: i + j, map(Counter, dic), Counter())
 
 def selector(pattern, dic):
   out = dic.copy()
@@ -102,10 +102,5 @@ if sys.argv[2] == "ixr":
         print(s)
   else:
     print("non-selectable candidates:")
-    combo_seen = 0
     for word, combo in iteritems(False).items():
-      if combo < combo_seen:
-        break
-      else:
-        combo_seen = combo
       print(word)
