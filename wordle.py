@@ -11,26 +11,32 @@ def sizefilter(dic):
   return filter(lambda w: len(w) == WORDSIZE, dic)
 
 def combos(letters):
+  out = []
   letters = list(letters)
   for l in range(min(WORDSIZE, len(letters)), 0, -1):
     for combo in combinations(letters, l):
-      yield combo
+      out.append(combo)
+  return out
 
 def include(letters, dic):
+  out = []
+  if letters == ".":
+    return dic
   for word in dic:
-    if letters == ".":
-      yield word
+    word_letters = Counter(word)
+    for l in letters:
+      if l not in word_letters:
+        break
     else:
-      for l in letters:
-        if l not in word:
-          break
-      else:
-        yield word
+      out.append(word)
+  return out
 
 def exclude(letters, dic):
+  out = []
   for word in dic:
     if not re.search("[" + letters + "]", word):
-      yield word
+      out.append(word)
+  return out
 
 def histogram(dic):
   total = Counter()
@@ -39,11 +45,13 @@ def histogram(dic):
   return total
 
 def selector(pattern, dic):
+  out = []
   pattern = re.sub("_([a-z]+)_", lambda i: "[^" + i.group(1) + "]", pattern)
   pattern = re.compile(pattern)
   for word in dic:
     if pattern.match(word):
-      yield word
+      out.append(word)
+  return out
 
 dic = set()
 with open(sys.argv[1], "r") as f:
@@ -63,34 +71,34 @@ if sys.argv[2] == "c":
   for i in hist:
     print(i[1], i[0])
 if sys.argv[2] == "ix":
-  for i in selector(sys.argv[5], exclude(sys.argv[4], include(sys.argv[3], dic))):
+  for i in include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic))):
     print(i)
 if sys.argv[2] == "ixc":
-  hist = list(histogram(selector(sys.argv[5], exclude(sys.argv[4], include(sys.argv[3], dic)))).items())
+  hist = list(histogram(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic)))).items())
   hist.sort(key=lambda i:i[1], reverse=True)
   for i in hist:
     print(i[1], i[0])
 if sys.argv[2] == "ixcx":
-  hist = list(histogram(selector(sys.argv[5], exclude(sys.argv[4], include(sys.argv[3], dic)))).items())
+  hist = list(histogram(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic)))).items())
   hist.sort(key=lambda i:i[1], reverse=True)
   for i in hist:
     if i[0] not in sys.argv[4]:
       print(i[1], i[0])
 if sys.argv[2] == "ixr":
-  sol = list(selector(sys.argv[5], exclude(sys.argv[4], include(sys.argv[3], dic))))
-  if len(sol) == 1:
-    print("unique solution found: ", sol[0])
+  filtered_dic = set(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic))))
+  if len(filtered_dic)  == 1:
+    print("unique solution found: ", list(filtered_dic)[0])
     sys.exit(0)
   def iteritems(double_filter = True):
-    hist = list(histogram(selector(sys.argv[5], exclude(sys.argv[4], include(sys.argv[3], dic)))).items())
+    hist = list(histogram(filtered_dic.copy()).items())
     hist.sort(key=lambda i:i[1], reverse=True)
     out = {}
+    dic_filtered = selector(sys.argv[5], dic)
+    if double_filter:
+      dic_filtered = exclude(sys.argv[3], dic_filtered)
     for n in range(WORDSIZE, 0, -1):
       for c in combinations(map(lambda i:i[0], hist), n):
-        if double_filter:
-          candidates = exclude(sys.argv[3], include("".join(c), dic))
-        else:
-          candidates = include("".join(c), dic)
+        candidates = include("".join(c), dic_filtered.copy())
         for candidate in candidates:
           if candidate not in out:
             out[candidate] = n
@@ -109,7 +117,7 @@ if sys.argv[2] == "ixr":
         break
     if max_combo <= 2:
       print("no strong downselect candidates, suggesting direct matches:")
-      for s in sol[:5]:
+      for s in list(filtered_dic)[:5]:
         print(s)
   else:
     print("non-selectable candidates:")
