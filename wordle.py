@@ -34,6 +34,25 @@ def selector(pattern, dic):
   out = list(filter(pattern.match, out))
   return out
 
+def bisect(include_letters, candidates, dic):
+  cand_hist = histogram(candidates)
+  cand_hist = dict(cand_hist)
+  for i in include_letters:
+    # remove include letters from the letters being considered. because they're required to be included
+    # they will not allow us to narrow the list
+    if i in cand_hist:
+      del(cand_hist[i])
+  bisect_letters = list(cand_hist.items())
+  bisect_letters = list(map(lambda i: (i[1], i[0]), bisect_letters))
+  bisect_letters.sort(reverse=True)
+  for n in range(WORDSIZE, 0, -1):
+    for c in combinations(bisect_letters, n):
+      bisect_words = include(map(lambda i: i[1], c), dic)
+      n = len(bisect_words)
+      if n > 0:
+        return bisect_words[0]
+  return
+
 dic = set()
 with open(sys.argv[1], "r") as f:
   for line in f:
@@ -66,41 +85,19 @@ if sys.argv[2] == "ixcx":
     if i[0] not in sys.argv[4]:
       print(i[1], i[0])
 if sys.argv[2] == "ixr":
-  filtered_dic = set(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic))))
+  include_letters = sys.argv[3]
+  exclude_letters = sys.argv[4]
+  selector_pattern = sys.argv[5]
+  filtered_dic = set(include(include_letters, exclude(exclude_letters, selector(selector_pattern, dic))))
   if len(filtered_dic)  == 1:
     print("unique solution found: ", list(filtered_dic)[0])
     sys.exit(0)
-  def iteritems(double_filter = True):
-    hist = list(histogram(filtered_dic.copy()).items())
-    hist.sort(key=lambda i:i[1], reverse=True)
-    out = {}
-    dic_filtered = selector(sys.argv[5], dic)
-    if double_filter:
-      dic_filtered = exclude(sys.argv[3], dic_filtered)
-    for n in range(WORDSIZE, 0, -1):
-      for c in combinations(map(lambda i:i[0], hist), n):
-        candidates = include("".join(c), dic_filtered.copy())
-        for candidate in candidates:
-          if candidate not in out:
-            out[candidate] = n
-          if len(out) > 10:
-            return out
-    return out
-  out = iteritems()
-  if out:
-    i = 5
-    max_combo = 0
-    for word, combo in out.items():
-      max_combo = max(max_combo, combo)
-      print(combo, word)
-      i -= 1
-      if not i:
-        break
-    if max_combo <= 2:
-      print("no strong downselect candidates, suggesting direct matches:")
-      for s in list(filtered_dic)[:5]:
-        print(s)
-  else:
-    print("non-selectable candidates:")
-    for word, combo in iteritems(False).items():
-      print(word)
+  bisect_result = bisect(include_letters, filtered_dic, dic)
+  if bisect_result:
+    print("bisect candidate:", bisect_result)
+    sys.exit(0)
+  if len(include_letters) == 5:
+    print("ambiguous candidates:")
+    for w in filtered_dic:
+      print(w)
+    sys.exit(0)
