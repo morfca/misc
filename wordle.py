@@ -58,46 +58,54 @@ with open(sys.argv[1], "r") as f:
   for line in f:
     dic.add(line.strip())
 dic = set(sizefilter(dic))
-
 if sys.argv[2] == "x":
-  for i in exclude(sys.argv[3], dic):
+  exclude_letters = sys.argv[3]
+  for i in exclude(exclude_letters, dic):
     print(i)
-if sys.argv[2] == "i":
-  for i in include(sys.argv[3], dic):
+elif sys.argv[2] == "i":
+  include_letters = sys.argv[3]
+  for i in include(include_letters, dic):
     print(i)
-if sys.argv[2] == "c":
-  hist = list(histogram(dic).items())
-  hist.sort(key=lambda i:i[1], reverse=True)
-  for i in hist:
-    print(i[1], i[0])
-if sys.argv[2] == "ix":
+elif sys.argv[2] == "ix":
+  include_letters = sys.argv[3]
+  exclude_letters = sys.argv[4]
+  selector_pattern = sys.argv[5]
   for i in include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic))):
     print(i)
-if sys.argv[2] == "ixc":
+elif sys.argv[2] == "ixc":
+  include_letters = sys.argv[3]
+  exclude_letters = sys.argv[4]
+  selector_pattern = sys.argv[5]
   hist = list(histogram(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic)))).items())
   hist.sort(key=lambda i:i[1], reverse=True)
   for i in hist:
     print(i[1], i[0])
-if sys.argv[2] == "ixcx":
+elif sys.argv[2] == "ixcx":
+  include_letters = sys.argv[3]
+  exclude_letters = sys.argv[4]
+  selector_pattern = sys.argv[5]
   hist = list(histogram(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic)))).items())
   hist.sort(key=lambda i:i[1], reverse=True)
   for i in hist:
     if i[0] not in sys.argv[4]:
       print(i[1], i[0])
-if sys.argv[2] == "ixr":
-  include_letters = sys.argv[3]
-  exclude_letters = sys.argv[4]
-  selector_pattern = sys.argv[5]
-  filtered_dic = set(include(include_letters, exclude(exclude_letters, selector(selector_pattern, dic))))
-  if len(filtered_dic)  == 1:
-    print("unique solution found: ", list(filtered_dic)[0])
-    sys.exit(0)
-  bisect_result = bisect(include_letters, filtered_dic, dic)
-  if bisect_result:
-    print("bisect candidate:", bisect_result)
-    sys.exit(0)
-  if len(include_letters) == 5:
-    print("ambiguous candidates:")
-    for w in filtered_dic:
-      print(w)
-    sys.exit(0)
+include_letters = sys.argv[2]
+exclude_letters = sys.argv[3]
+selector_pattern = sys.argv[4]
+filtered_dic = set(include(include_letters, exclude(exclude_letters, selector(selector_pattern, dic))))
+if len(filtered_dic)  == 1:
+  print("unique solution found:", list(filtered_dic)[0])
+  sys.exit(0)
+bisect_result = bisect(include_letters, filtered_dic, dic)
+if bisect_result:
+  print("bisect candidate:", bisect_result)
+  sys.exit(0)
+if len(filtered_dic) == 0:
+  print("no candidates found, check for user error")
+elif len(include_letters) == 5:
+  print("ambiguous candidates:")
+else:
+  print("ambiguous candidates, probable double letter:")
+for w in filtered_dic:
+  print(w)
+sys.exit(0)
