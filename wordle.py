@@ -58,37 +58,6 @@ with open(sys.argv[1], "r") as f:
   for line in f:
     dic.add(line.strip())
 dic = set(sizefilter(dic))
-if sys.argv[2] == "x":
-  exclude_letters = sys.argv[3]
-  for i in exclude(exclude_letters, dic):
-    print(i)
-elif sys.argv[2] == "i":
-  include_letters = sys.argv[3]
-  for i in include(include_letters, dic):
-    print(i)
-elif sys.argv[2] == "ix":
-  include_letters = sys.argv[3]
-  exclude_letters = sys.argv[4]
-  selector_pattern = sys.argv[5]
-  for i in include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic))):
-    print(i)
-elif sys.argv[2] == "ixc":
-  include_letters = sys.argv[3]
-  exclude_letters = sys.argv[4]
-  selector_pattern = sys.argv[5]
-  hist = list(histogram(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic)))).items())
-  hist.sort(key=lambda i:i[1], reverse=True)
-  for i in hist:
-    print(i[1], i[0])
-elif sys.argv[2] == "ixcx":
-  include_letters = sys.argv[3]
-  exclude_letters = sys.argv[4]
-  selector_pattern = sys.argv[5]
-  hist = list(histogram(include(sys.argv[3], exclude(sys.argv[4], selector(sys.argv[5], dic)))).items())
-  hist.sort(key=lambda i:i[1], reverse=True)
-  for i in hist:
-    if i[0] not in sys.argv[4]:
-      print(i[1], i[0])
 include_letters = sys.argv[2]
 exclude_letters = sys.argv[3]
 selector_pattern = sys.argv[4]
