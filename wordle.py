@@ -12,10 +12,12 @@ def sizefilter(dic):
   return list(filter(lambda w: len(w) == WORDSIZE, dic))
 
 def include(letters, dic):
-  out = dic.copy()
+  out = dic
   if letters == ".":
     return dic
   for l in letters:
+    # the list() call is needed to force the filter to be fully executed immediately
+    # this is necessary because 'l' will have a different value if we defer execution
     out = list(filter(lambda w: l in w, out))
   return out
 
