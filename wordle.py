@@ -108,6 +108,8 @@ def step(dict_file, ans_file, include_letters, exclude_letters, selector_pattern
   if len(filtered_ans)  == 1:
     print("unique solution found:", list(filtered_ans)[0])
     return "U", list(filtered_ans)[0]
+  if len(filtered_ans) <= 5:
+    print("direct candidates:", ", ".join(filtered_ans))
   bisect_result = bisect(include_letters, filtered_ans, dic)
   if bisect_result:
     print("bisect candidate:", bisect_result)
